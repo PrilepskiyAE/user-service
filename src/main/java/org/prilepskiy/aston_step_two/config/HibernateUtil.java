@@ -1,4 +1,4 @@
-package org.prilepskiy.aston_step_two.utils;
+package org.prilepskiy.aston_step_two.config;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.MetadataSources;
