@@ -11,4 +11,4 @@ public class Main {
         ConsoleHelper consoleHelper = new ConsoleHelper();
         new UserConsoleController(consoleHelper).start();
     }
-    }
+}
