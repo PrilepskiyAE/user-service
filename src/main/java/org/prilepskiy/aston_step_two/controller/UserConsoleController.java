@@ -1,13 +1,16 @@
 package org.prilepskiy.aston_step_two.controller;
 
+import org.prilepskiy.aston_step_two.dao.UserDao;
+import org.prilepskiy.aston_step_two.dao.UserDaoImpl;
 import org.prilepskiy.aston_step_two.utils.ConsoleHelper;
 
 public class UserConsoleController extends UserController {
 
     private final ConsoleHelper consoleHelper;
-
+    private final UserDao userDao;
     public UserConsoleController( ConsoleHelper consoleHelper) {
         this.consoleHelper = consoleHelper;
+        this.userDao = new UserDaoImpl();
     }
 
     private void showMenu() {
@@ -63,7 +66,7 @@ public class UserConsoleController extends UserController {
 
     @Override
     void createUser() {
-        System.out.println("=======Создать пользователя======");
+        System.out.println("=======Создание пользователя======");
         consoleHelper.readLine("test: ");
         clearConsole();
     }
