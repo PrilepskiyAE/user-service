@@ -2,9 +2,13 @@ package org.prilepskiy.aston_step_two.controller;
 
 import org.prilepskiy.aston_step_two.dao.UserDao;
 import org.prilepskiy.aston_step_two.dao.UserDaoImpl;
+import org.prilepskiy.aston_step_two.model.User;
 import org.prilepskiy.aston_step_two.utils.ConsoleHelper;
 
-public class UserConsoleController extends UserController {
+import java.util.List;
+import java.util.Optional;
+
+public class UserConsoleController implements UserController {
 
     private final ConsoleHelper consoleHelper;
     private final UserDao userDao;
@@ -25,9 +29,9 @@ public class UserConsoleController extends UserController {
     }
 
     private void clearConsole() {
-        for (int i = 0; i < 50; i++) {
-            System.out.println();
-        }
+//        for (int i = 0; i < 50; i++) {
+//            System.out.println();
+//        }
     }
     public void start() {
         boolean running = true;
@@ -65,38 +69,104 @@ public class UserConsoleController extends UserController {
     }
 
     @Override
-    void createUser() {
+    public void createUser() {
         System.out.println("=======Создание пользователя======");
-        consoleHelper.readLine("test: ");
+        String name = consoleHelper.readLine("Введите имя: ");
+        String email;
+        while (true) {
+            email = consoleHelper.readLine("Введите Email: ");
+            if (isValidEmail(email)) {
+                break;
+            } else {
+                System.out.println("Некорректный формат email. Пример: user@example.com");
+            }
+        }
+        int age = consoleHelper.readInt("Возраст: ");
+        User user = new User(name, email, age);
+        User saved = userDao.save(user);
+        System.out.println("Пользователь успешно создан: " + saved);
         clearConsole();
     }
 
     @Override
-    void getUserById() {
+    public void getUserById() {
         System.out.println("=======Найти пользователя по ID======");
-        consoleHelper.readLine("test: ");
+        long id = consoleHelper.readLong("Введите идентификатор пользователя: ");
+        Optional<User> opt = userDao.findById(id);
+        opt.ifPresentOrElse(
+                u -> System.out.println("Нашел: " + u),
+                () -> System.out.println("Пользователь не найден")
+        );
         clearConsole();
     }
 
     @Override
-    void getAllUsers() {
+    public void getAllUsers() {
         System.out.println("=======Показать всех пользователей======");
-        consoleHelper.readLine("test: ");
+        List<User> users = userDao.findAll();
+        if (users.isEmpty()) {
+            System.out.println("Пользователи не найдены.");
+        } else {
+            users.forEach(System.out::println);
+        }
+
+        consoleHelper.readLine("Нажмите любую кнопку: ");
         clearConsole();
     }
 
     @Override
-    void updateUser() {
+    public void updateUser() {
         System.out.println("=======Обновить пользователя======");
-        consoleHelper.readLine("test: ");
+        long id = consoleHelper.readLong("Введите идентификатор пользователя для обновления: ");
+        Optional<User> opt = userDao.findById(id);
+        if (opt.isEmpty()) {
+            System.out.println("Пользователь не найден");
+            return;
+        }
+        User existing = opt.get();
+        System.out.println("Текущий: " + existing);
+
+        String name = consoleHelper.readLine("Введите новое имя: ");
+        String email;
+        while (true) {
+            email =  consoleHelper.readLine("Введите новый email:  ");
+            if (isValidEmail(email)) {
+                break;
+            } else {
+                System.out.println("Некорректный формат email. Пример: user@example.com");
+            }
+        }
+
+        int age = consoleHelper.readInt("Введите новый возраст: ");
+
+        existing.setName(name);
+        existing.setEmail(email);
+        existing.setAge(age);
+
+        User updated = userDao.update(existing);
+        System.out.println("Обновленно: " + updated);
         clearConsole();
     }
 
 
     @Override
-    void deleteUser() {
+    public void deleteUser() {
         System.out.println("=======Удалить пользователя======");
-        consoleHelper.readLine("test: ");
+        long id = consoleHelper.readLong("Введите идентификатор пользователя для удаления: ");
+        boolean deleted = userDao.deleteById(id);
+        if (deleted) {
+            System.out.println("Пользователь успешно удален");
+        } else {
+            System.out.println("Не удалось удалить (возможно, пользователь не существует)");
+        }
         clearConsole();
+    }
+
+    private boolean isValidEmail(String email) {
+        if (email == null || email.trim().isEmpty()) {
+            return false;
+        }
+        String regex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
+        return email.matches(regex);
     }
 }

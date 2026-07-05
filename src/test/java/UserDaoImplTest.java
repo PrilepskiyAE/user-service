@@ -30,9 +30,10 @@ class UserDaoImplTest {
         MockitoAnnotations.openMocks(this);
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             Transaction tx = session.beginTransaction();
-            session.createNativeQuery("TRUNCATE TABLE users RESTART IDENTITY").executeUpdate();
+            session.createNativeMutationQuery("TRUNCATE TABLE users RESTART IDENTITY")
+                    .executeUpdate();;
             tx.commit();
-        } catch (Exception e) {}
+        }
     }
 
     @Test
