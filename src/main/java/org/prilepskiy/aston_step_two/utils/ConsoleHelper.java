@@ -1,13 +1,12 @@
 package org.prilepskiy.aston_step_two.utils;
 
 import java.util.Scanner;
-import java.util.regex.Pattern;
+
+import static org.prilepskiy.aston_step_two.utils.Constants.*;
 
 public class ConsoleHelper {
 
     private final Scanner scanner = new Scanner(System.in);
-    private static final Pattern EMAIL_PATTERN =
-            Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
 
     public String readLine(String message) {
         System.out.print(message);
@@ -35,6 +34,7 @@ public class ConsoleHelper {
             }
         }
     }
+
     public String readValidName(String message) {
         while (true) {
             String name = readLine(message);
@@ -78,13 +78,13 @@ public class ConsoleHelper {
 
         String trimmed = name.trim();
 
-        return trimmed.length() >= 2
-                && trimmed.length() <= 100
-                && trimmed.matches("^[A-Za-zА-Яа-яЁё\\s'-]+$");
+        return trimmed.length() >= MIN_NAME_LEN
+                && trimmed.length() <= MAX_NAME_LEN
+                && NAME_PATTERN.matcher(trimmed).matches();
     }
 
     public boolean isValidAge(int age) {
-        return age >= 0 && age <= 100;
+        return age >= MIN_AGE_LEN && age <= MAX_AGE_LEN;
     }
 
     public boolean isValidEmail(String email) {
@@ -94,7 +94,7 @@ public class ConsoleHelper {
 
         String trimmed = email.trim();
 
-        if (trimmed.length() < 6 || trimmed.length() > 255) {
+        if (trimmed.length() < MIN_EMAIL_LEN || trimmed.length() > MAX_EMAIL_LEN) {
             return false;
         }
 
@@ -107,12 +107,12 @@ public class ConsoleHelper {
         }
 
         int atIndex = trimmed.indexOf('@');
-        if (atIndex <= 0 || atIndex != trimmed.lastIndexOf('@')) {
+        if (atIndex <= FIRST_INDEX || atIndex != trimmed.lastIndexOf('@')) {
             return false;
         }
 
-        String localPart = trimmed.substring(0, atIndex);
-        String domainPart = trimmed.substring(atIndex + 1);
+        String localPart = trimmed.substring(FIRST_INDEX, atIndex);
+        String domainPart = trimmed.substring(atIndex + SHIFT_INDEX);
 
         if (localPart.startsWith(".") || localPart.endsWith(".")) {
             return false;

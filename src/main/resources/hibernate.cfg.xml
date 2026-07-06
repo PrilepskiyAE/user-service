@@ -10,7 +10,7 @@
         <property name="hibernate.connection.password">astonpassword</property>
         <property name="hibernate.connection.pool_size">10</property>
         <property name="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</property>
-        <property name="hibernate.show_sql">true</property>
+        <property name="hibernate.show_sql">false</property> <!-- отключил чтобы не ломал восприятия консольного меню лишними выводами -->
         <property name="hibernate.format_sql">true</property>
         <property name="hibernate.hbm2ddl.auto">update</property>
         <mapping class="org.prilepskiy.aston_step_two.model.User"/>
