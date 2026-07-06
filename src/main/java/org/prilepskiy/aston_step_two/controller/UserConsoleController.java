@@ -29,6 +29,8 @@ public class UserConsoleController implements UserController {
     }
 
     private void clearConsole() {
+        consoleHelper.readLine("Нажмите любую кнопку! ");
+//        Для удобства, на случай если нужна очистка консоли
 //        for (int i = 0; i < 50; i++) {
 //            System.out.println();
 //        }
@@ -71,17 +73,20 @@ public class UserConsoleController implements UserController {
     @Override
     public void createUser() {
         System.out.println("=======Создание пользователя======");
-        String name = consoleHelper.readLine("Введите имя: ");
+        String name = consoleHelper.readValidName("Введите имя: ");
         String email;
         while (true) {
-            email = consoleHelper.readLine("Введите Email: ");
-            if (isValidEmail(email)) {
-                break;
-            } else {
-                System.out.println("Некорректный формат email. Пример: user@example.com");
+            email = consoleHelper.readValidEmail("Введите Email: ");
+
+            if (userDao.findByEmail(email).isPresent()) {
+                System.out.println("Пользователь с таким email уже существует. Попробуйте другой.");
+                continue;
             }
+            break;
         }
-        int age = consoleHelper.readInt("Возраст: ");
+
+
+        int age = consoleHelper.readValidAge("Возраст: ");
         User user = new User(name, email, age);
         User saved = userDao.save(user);
         System.out.println("Пользователь успешно создан: " + saved);
@@ -110,7 +115,6 @@ public class UserConsoleController implements UserController {
             users.forEach(System.out::println);
         }
 
-        consoleHelper.readLine("Нажмите любую кнопку: ");
         clearConsole();
     }
 
@@ -126,18 +130,20 @@ public class UserConsoleController implements UserController {
         User existing = opt.get();
         System.out.println("Текущий: " + existing);
 
-        String name = consoleHelper.readLine("Введите новое имя: ");
+        String name = consoleHelper.readValidName("Введите новое имя: ");
         String email;
         while (true) {
-            email =  consoleHelper.readLine("Введите новый email:  ");
-            if (isValidEmail(email)) {
-                break;
-            } else {
-                System.out.println("Некорректный формат email. Пример: user@example.com");
+            email = consoleHelper.readValidEmail("Введите новый email: ");
+
+            if (userDao.findByEmail(email).isPresent()) {
+                System.out.println("Пользователь с таким email уже существует. Попробуйте другой.");
+                continue;
             }
+            break;
+
         }
 
-        int age = consoleHelper.readInt("Введите новый возраст: ");
+        int age = consoleHelper.readValidAge("Введите новый возраст: ");
 
         existing.setName(name);
         existing.setEmail(email);
@@ -162,11 +168,4 @@ public class UserConsoleController implements UserController {
         clearConsole();
     }
 
-    private boolean isValidEmail(String email) {
-        if (email == null || email.trim().isEmpty()) {
-            return false;
-        }
-        String regex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
-        return email.matches(regex);
-    }
 }

@@ -1,10 +1,13 @@
 package org.prilepskiy.aston_step_two.utils;
 
 import java.util.Scanner;
+import java.util.regex.Pattern;
 
 public class ConsoleHelper {
 
     private final Scanner scanner = new Scanner(System.in);
+    private static final Pattern EMAIL_PATTERN =
+            Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
 
     public String readLine(String message) {
         System.out.print(message);
@@ -32,5 +35,103 @@ public class ConsoleHelper {
             }
         }
     }
+    public String readValidName(String message) {
+        while (true) {
+            String name = readLine(message);
 
+            if (isValidName(name)) {
+                return name;
+            }
+
+            System.out.println("Имя должно быть от 2 до 100 символов и содержать только буквы, пробелы, '-' или апостроф.");
+        }
+    }
+
+    public int readValidAge(String message) {
+        while (true) {
+            int age = readInt(message);
+
+            if (isValidAge(age)) {
+                return age;
+            }
+
+            System.out.println("Возраст должен быть в диапазоне от 0 до 100.");
+        }
+    }
+
+    public String readValidEmail(String message) {
+        while (true) {
+            String email = readLine(message);
+
+            if (isValidEmail(email)) {
+                return email;
+            }
+
+            System.out.println("Введите корректный email.");
+        }
+    }
+
+    public boolean isValidName(String name) {
+        if (name == null) {
+            return false;
+        }
+
+        String trimmed = name.trim();
+
+        return trimmed.length() >= 2
+                && trimmed.length() <= 100
+                && trimmed.matches("^[A-Za-zА-Яа-яЁё\\s'-]+$");
+    }
+
+    public boolean isValidAge(int age) {
+        return age >= 0 && age <= 100;
+    }
+
+    public boolean isValidEmail(String email) {
+        if (email == null) {
+            return false;
+        }
+
+        String trimmed = email.trim();
+
+        if (trimmed.length() < 6 || trimmed.length() > 255) {
+            return false;
+        }
+
+        if (!EMAIL_PATTERN.matcher(trimmed).matches()) {
+            return false;
+        }
+
+        if (trimmed.contains("..")) {
+            return false;
+        }
+
+        int atIndex = trimmed.indexOf('@');
+        if (atIndex <= 0 || atIndex != trimmed.lastIndexOf('@')) {
+            return false;
+        }
+
+        String localPart = trimmed.substring(0, atIndex);
+        String domainPart = trimmed.substring(atIndex + 1);
+
+        if (localPart.startsWith(".") || localPart.endsWith(".")) {
+            return false;
+        }
+
+        if (!domainPart.contains(".")) {
+            return false;
+        }
+
+        String[] labels = domainPart.split("\\.");
+        for (String label : labels) {
+            if (label.isEmpty()) {
+                return false;
+            }
+            if (label.startsWith("-") || label.endsWith("-")) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }
