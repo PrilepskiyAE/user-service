@@ -8,13 +8,24 @@ import org.prilepskiy.aston_step_two.utils.ConsoleHelper;
 import java.util.List;
 import java.util.Optional;
 
+import static org.prilepskiy.aston_step_two.utils.Constants.*;
+
 public class UserConsoleController implements UserController {
+
+    private static UserConsoleController instance;
 
     private final ConsoleHelper consoleHelper;
     private final UserDao userDao;
-    public UserConsoleController( ConsoleHelper consoleHelper) {
-        this.consoleHelper = consoleHelper;
+    private UserConsoleController() {
+        this.consoleHelper = new ConsoleHelper();
         this.userDao = new UserDaoImpl();
+    }
+
+    public static UserConsoleController getInstance() {
+        if (instance == null) {
+            instance = new UserConsoleController();
+        }
+        return instance;
     }
 
     private void showMenu() {
@@ -29,7 +40,7 @@ public class UserConsoleController implements UserController {
     }
 
     private void clearConsole() {
-        consoleHelper.readLine("Нажмите любую кнопку! ");
+        consoleHelper.readLine("Нажмите ENTER! ");
 //        Для удобства, на случай если нужна очистка консоли
 //        for (int i = 0; i < 50; i++) {
 //            System.out.println();
@@ -43,22 +54,22 @@ public class UserConsoleController implements UserController {
             int choice = consoleHelper.readInt("Выбери пункт меню: ");
 
             switch (choice) {
-                case 1:
+                case CREATE_USER:
                     createUser();
                     break;
-                case 2:
+                case GET_USER_BY_ID:
                     getUserById();
                     break;
-                case 3:
+                case GET_ALL_USERS:
                     getAllUsers();
                     break;
-                case 4:
+                case UPDATE_USER:
                     updateUser();
                     break;
-                case 5:
+                case DELETE_USER:
                     deleteUser();
                     break;
-                case 0:
+                case EXIT:
                     running = false;
                     System.out.println("Выход из программы...");
                     break;
@@ -140,7 +151,6 @@ public class UserConsoleController implements UserController {
                 continue;
             }
             break;
-
         }
 
         int age = consoleHelper.readValidAge("Введите новый возраст: ");

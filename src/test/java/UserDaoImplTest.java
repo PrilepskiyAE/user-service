@@ -184,8 +184,6 @@ class UserDaoImplTest {
 
         User duplicate = new User("test_Grace2", "test_grace@test.com", 30);
 
-        org.junit.jupiter.api.Assertions.assertThrows(Exception.class, () -> {
-            userDao.save(duplicate);
-        });
+        org.junit.jupiter.api.Assertions.assertThrows(Exception.class, () -> userDao.save(duplicate));
     }
 }

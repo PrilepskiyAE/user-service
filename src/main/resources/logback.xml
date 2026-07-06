@@ -9,9 +9,8 @@
         <appender-ref ref="CONSOLE"/>
     </root>
 
-    <logger name="org.hibernate" level="WARN"/>
-    <logger name="org.postgresql" level="WARN"/>
-    <logger name="org.hibernate.SQL" level="DEBUG"/>
-    <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="TRACE"/>
-
+    <logger name="org.hibernate" level="ERROR"/>
+    <logger name="org.postgresql" level="ERROR"/>
+    <logger name="org.hibernate.SQL" level="ERROR"/>
+    <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="ERROR"/>
 </configuration>
