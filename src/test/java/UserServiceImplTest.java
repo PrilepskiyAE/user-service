@@ -22,7 +22,6 @@ import static org.mockito.Mockito.*;
 
 @Epic("Service Layer Tests")
 @Feature("UserServiceImpl Business Logic")
-@Story("User Business Rules")
 @ExtendWith(MockitoExtension.class)
 
 public class UserServiceImplTest extends BaseTest{

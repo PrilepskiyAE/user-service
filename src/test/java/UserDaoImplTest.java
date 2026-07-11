@@ -13,7 +13,6 @@ import java.util.Optional;
 
 @Epic("DAO Layer Tests")
 @Feature("UserDaoImpl CRUD Operations")
-@Story("User Persistence")
 class UserDaoImplTest extends BaseIntegrationTest {
 
     private final UserDao userDao = new UserDaoImpl();
