@@ -1,7 +1,6 @@
 package org.prilepskiy.aston_step_two.service;
 
 import org.prilepskiy.aston_step_two.dao.UserDao;
-import org.prilepskiy.aston_step_two.dao.UserDaoImpl;
 import org.prilepskiy.aston_step_two.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,11 +12,14 @@ public class UserServiceImpl implements UserService {
 
     private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
-    private final UserDao userDao = new UserDaoImpl();;
-
+    private final UserDao userDao;
+    public UserServiceImpl(UserDao userDao) {
+        this.userDao = userDao;
+    }
     @Override
     public User createUser(String name, String email, int age) {
         if (userDao.findByEmail(email).isPresent()) {
+            logger.info("Пользователь с таким email уже существует");
             throw new IllegalArgumentException("Пользователь с таким email уже существует: " + email);
         }
         User user = new User(name, email, age);
@@ -38,13 +40,14 @@ public class UserServiceImpl implements UserService {
     public User updateUser(Long id, String name, String email, int age) {
         Optional<User> existingOpt = userDao.findById(id);
         if (existingOpt.isEmpty()) {
+            logger.info("Пользователь не найден по ID");
             throw new IllegalArgumentException("Пользователь не найден по ID: " + id);
         }
 
         User existing = existingOpt.get();
 
-        // Проверка уникальности email: если email меняется и новый уже занят
         if (!existing.getEmail().equals(email) && userDao.findByEmail(email).isPresent()) {
+            logger.info("Пользователь с таким email уже существует");
             throw new IllegalArgumentException("Пользователь с таким email уже существует: " + email);
         }
 
