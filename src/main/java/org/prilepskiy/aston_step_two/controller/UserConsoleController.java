@@ -3,6 +3,8 @@ package org.prilepskiy.aston_step_two.controller;
 import org.prilepskiy.aston_step_two.dao.UserDao;
 import org.prilepskiy.aston_step_two.dao.UserDaoImpl;
 import org.prilepskiy.aston_step_two.model.User;
+import org.prilepskiy.aston_step_two.service.UserService;
+import org.prilepskiy.aston_step_two.service.UserServiceImpl;
 import org.prilepskiy.aston_step_two.utils.ConsoleHelper;
 
 import java.util.List;
@@ -15,10 +17,12 @@ public class UserConsoleController implements UserController {
     private static UserConsoleController instance;
 
     private final ConsoleHelper consoleHelper;
-    private final UserDao userDao;
+    private final UserService userService;
+
     private UserConsoleController() {
         this.consoleHelper = new ConsoleHelper();
-        this.userDao = new UserDaoImpl();
+        UserDao  dao = new UserDaoImpl();
+        this.userService = new UserServiceImpl(dao);
     }
 
     public static UserConsoleController getInstance() {
@@ -88,27 +92,30 @@ public class UserConsoleController implements UserController {
         String email;
         while (true) {
             email = consoleHelper.readValidEmail("Введите Email: ");
-
-            if (userDao.findByEmail(email).isPresent()) {
+            if (userService.isEmailExists(email)) {
                 System.out.println("Пользователь с таким email уже существует. Попробуйте другой.");
                 continue;
             }
             break;
         }
-
-
         int age = consoleHelper.readValidAge("Возраст: ");
-        User user = new User(name, email, age);
-        User saved = userDao.save(user);
-        System.out.println("Пользователь успешно создан: " + saved);
-        clearConsole();
+
+        try {
+            User saved = userService.createUser(name, email, age);
+            System.out.println("Пользователь успешно создан: " + saved);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Ошибка при создании: " + e.getMessage());
+        } finally {
+            clearConsole();
+        }
     }
 
     @Override
     public void getUserById() {
         System.out.println("=======Найти пользователя по ID======");
         long id = consoleHelper.readLong("Введите идентификатор пользователя: ");
-        Optional<User> opt = userDao.findById(id);
+
+        Optional<User> opt = userService.getUserById(id);
         opt.ifPresentOrElse(
                 u -> System.out.println("Нашел: " + u),
                 () -> System.out.println("Пользователь не найден")
@@ -119,57 +126,49 @@ public class UserConsoleController implements UserController {
     @Override
     public void getAllUsers() {
         System.out.println("=======Показать всех пользователей======");
-        List<User> users = userDao.findAll();
+        List<User> users = userService.getAllUsers();
         if (users.isEmpty()) {
             System.out.println("Пользователи не найдены.");
         } else {
             users.forEach(System.out::println);
         }
-
         clearConsole();
     }
 
     @Override
     public void updateUser() {
         System.out.println("=======Обновить пользователя======");
-        long id = consoleHelper.readLong("Введите идентификатор пользователя для обновления: ");
-        Optional<User> opt = userDao.findById(id);
-        if (opt.isEmpty()) {
-            System.out.println("Пользователь не найден");
-            return;
-        }
-        User existing = opt.get();
-        System.out.println("Текущий: " + existing);
+        long id = consoleHelper.readLong("Введите ID пользователя для обновления: ");
 
-        String name = consoleHelper.readValidName("Введите новое имя: ");
-        String email;
-        while (true) {
-            email = consoleHelper.readValidEmail("Введите новый email: ");
-
-            if (userDao.findByEmail(email).isPresent()) {
-                System.out.println("Пользователь с таким email уже существует. Попробуйте другой.");
-                continue;
+        try {
+            String name = consoleHelper.readValidName("Введите новое имя: ");
+            String email;
+            while (true) {
+                email = consoleHelper.readValidEmail("Введите новый email: ");
+                if (userService.isEmailExists(email)) {
+                    System.out.println("Пользователь с таким email уже существует. Попробуйте другой.");
+                    continue;
+                }
+                break;
             }
-            break;
+            int age = consoleHelper.readValidAge("Введите новый возраст: ");
+
+            User updated = userService.updateUser(id, name, email, age);
+            System.out.println("Обновлено: " + updated);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Ошибка при обновлении: " + e.getMessage());
+        } finally {
+            clearConsole();
         }
-
-        int age = consoleHelper.readValidAge("Введите новый возраст: ");
-
-        existing.setName(name);
-        existing.setEmail(email);
-        existing.setAge(age);
-
-        User updated = userDao.update(existing);
-        System.out.println("Обновленно: " + updated);
-        clearConsole();
     }
 
 
     @Override
     public void deleteUser() {
         System.out.println("=======Удалить пользователя======");
-        long id = consoleHelper.readLong("Введите идентификатор пользователя для удаления: ");
-        boolean deleted = userDao.deleteById(id);
+        long id = consoleHelper.readLong("Введите ID пользователя для удаления: ");
+
+        boolean deleted = userService.deleteUserById(id);
         if (deleted) {
             System.out.println("Пользователь успешно удален");
         } else {

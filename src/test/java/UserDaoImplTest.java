@@ -1,18 +1,11 @@
 
 import io.qameta.allure.*;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
-import org.prilepskiy.aston_step_two.config.HibernateUtil;
+import org.prilepskiy.aston_step_two.dao.UserDao;
 import org.prilepskiy.aston_step_two.dao.UserDaoImpl;
 import org.assertj.core.api.Assertions;
 import org.prilepskiy.aston_step_two.model.User;
-
 
 import java.util.List;
 import java.util.Optional;
@@ -21,25 +14,9 @@ import java.util.Optional;
 @Epic("DAO Layer Tests")
 @Feature("UserDaoImpl CRUD Operations")
 @Story("User Persistence")
-class UserDaoImplTest {
+class UserDaoImplTest extends BaseIntegrationTest {
 
-    @Spy
-    private UserDaoImpl userDao;
-    @BeforeEach
-    void setUp(){
-        MockitoAnnotations.openMocks(this);
-    }
-
-    @AfterEach
-    void setDown() {
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            Transaction tx = session.beginTransaction();
-            session.createMutationQuery("DELETE FROM User u WHERE u.email LIKE :prefix")
-                    .setParameter("prefix", "test_%")
-                    .executeUpdate();
-            tx.commit();
-        }
-    }
+    private final UserDao userDao = new UserDaoImpl();
 
     @Test
     @Severity(SeverityLevel.CRITICAL)
@@ -49,13 +26,13 @@ class UserDaoImplTest {
     @Story("Проверка операции save")
     @Owner("Prilepskiy AE")
     void Test1() {
-        User user = new User("test_Prilepskiy_AE", "test_Prilepskiy_AE@Aston.com", 25);
+        User user = createTestUser();
         User saved = userDao.save(user);
 
         Assertions.assertThat(saved).isNotNull();
         Assertions.assertThat(saved.getId()).isNotNull();
-        Assertions.assertThat(saved.getName()).isEqualTo("test_Prilepskiy_AE");
-        Assertions.assertThat(saved.getEmail()).isEqualTo("test_Prilepskiy_AE@Aston.com");
+        Assertions.assertThat(saved.getName()).isEqualTo(name);
+        Assertions.assertThat(saved.getEmail()).isEqualTo(email);
 
     }
 
@@ -67,7 +44,7 @@ class UserDaoImplTest {
     @Story("Поиск пользователя по ID")
     @Owner("Prilepskiy AE")
     void Test2() {
-        User original = new User("test_Bob", "test_bob@test.com", 30);
+        User original = createTestUser();
         User saved = userDao.save(original);
 
         Assertions.assertThat(saved).isNotNull();
@@ -78,13 +55,13 @@ class UserDaoImplTest {
         Assertions.assertThat(result).isNotEmpty();
         User found = result.get();
         Assertions.assertThat(found.getId()).isEqualTo(saved.getId());
-        Assertions.assertThat(found.getName()).isEqualTo("test_Bob");
-        Assertions.assertThat(found.getEmail()).isEqualTo("test_bob@test.com");
-        Assertions.assertThat(found.getAge()).isEqualTo(30);
+        Assertions.assertThat(found.getName()).isEqualTo(name);
+        Assertions.assertThat(found.getEmail()).isEqualTo(email);
+        Assertions.assertThat(found.getAge()).isEqualTo(age);
     }
 
     @Test
-    @Severity(SeverityLevel.NORMAL)
+    @Severity(SeverityLevel.CRITICAL)
     @DisplayName("findById: поиск несуществующего пользователя должен вернуть пустой Optional")
     @Description("Проверяет, что findById корректно обрабатывает случай, когда пользователь с указанным ID отсутствует в БД, " +
             "и возвращает пустой Optional вместо null или исключения.")
@@ -106,14 +83,14 @@ class UserDaoImplTest {
     @Story("Получение списка всех пользователей")
     @Owner("Prilepskiy AE")
     void test4() {
-        userDao.save(new User("test_Cara", "test_cara@test.com", 28));
-        userDao.save(new User("test_Dan", "test_dan@test.com", 35));
+        userDao.save(createTestUser());
+        userDao.save(new User("test_test", "test_test@test.com", 35));
 
         List<User> all = userDao.findAll();
 
         Assertions.assertThat(all).isNotEmpty();
         Assertions.assertThat(all.stream().map(User::getEmail).toList())
-                .contains("test_cara@test.com", "test_dan@test.com");
+                .contains(email, "test_test@test.com");
     }
 
     @Test
@@ -125,15 +102,15 @@ class UserDaoImplTest {
     @Owner("Prilepskiy AE")
     void test5() {
 
-        User original = new User("test_Eve", "test_eve@test.com", 40);
+        User original = createTestUser();
         User saved = userDao.save(original);
         saved.setAge(41);
-        saved.setName("test_Eve Updated");
+        saved.setName("test_Alex Updated");
 
         User updated = userDao.update(saved);
 
         Assertions.assertThat(updated.getId()).isEqualTo(saved.getId());
-        Assertions.assertThat(updated.getName()).isEqualTo("test_Eve Updated");
+        Assertions.assertThat(updated.getName()).isEqualTo("test_Alex Updated");
         Assertions.assertThat(updated.getAge()).isEqualTo(41);
     }
     @Test
@@ -145,7 +122,7 @@ class UserDaoImplTest {
     @Owner("Prilepskiy AE")
     void test6() {
 
-        User toDelete = new User("test_Frank", "test_frank@test.com", 50);
+        User toDelete = createTestUser();
         User saved = userDao.save(toDelete);
 
         boolean result = userDao.deleteById(saved.getId());
@@ -180,9 +157,9 @@ class UserDaoImplTest {
     @Owner("Prilepskiy AE")
     void test8() {
 
-        userDao.save(new User("test_Grace", "test_grace@test.com", 29));
+        userDao.save(createTestUser());
 
-        User duplicate = new User("test_Grace2", "test_grace@test.com", 30);
+        User duplicate = new User("test_test2", email, 30);
 
         org.junit.jupiter.api.Assertions.assertThrows(Exception.class, () -> userDao.save(duplicate));
     }
