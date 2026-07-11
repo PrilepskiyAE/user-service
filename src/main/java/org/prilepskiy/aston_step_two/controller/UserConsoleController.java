@@ -21,7 +21,8 @@ public class UserConsoleController implements UserController {
 
     private UserConsoleController() {
         this.consoleHelper = new ConsoleHelper();
-        this.userService = new UserServiceImpl();
+        UserDao  dao = new UserDaoImpl();
+        this.userService = new UserServiceImpl(dao);
     }
 
     public static UserConsoleController getInstance() {
