@@ -1,15 +1,11 @@
 
 import io.qameta.allure.*;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
+import org.prilepskiy.aston_step_two.dao.UserDao;
 import org.prilepskiy.aston_step_two.dao.UserDaoImpl;
 import org.assertj.core.api.Assertions;
 import org.prilepskiy.aston_step_two.model.User;
-
 
 import java.util.List;
 import java.util.Optional;
@@ -18,15 +14,9 @@ import java.util.Optional;
 @Epic("DAO Layer Tests")
 @Feature("UserDaoImpl CRUD Operations")
 @Story("User Persistence")
-class UserDaoImplTest extends BaseTest{
+class UserDaoImplTest extends BaseIntegrationTest {
 
-    @Spy
-    private UserDaoImpl userDao;
-    @BeforeEach
-    void setUp(){
-        MockitoAnnotations.openMocks(this);
-    }
-
+    private final UserDao userDao = new UserDaoImpl();
 
     @Test
     @Severity(SeverityLevel.CRITICAL)
@@ -36,7 +26,7 @@ class UserDaoImplTest extends BaseTest{
     @Story("Проверка операции save")
     @Owner("Prilepskiy AE")
     void Test1() {
-        User user = new User(name, email, age);
+        User user = createTestUser();
         User saved = userDao.save(user);
 
         Assertions.assertThat(saved).isNotNull();
@@ -54,7 +44,7 @@ class UserDaoImplTest extends BaseTest{
     @Story("Поиск пользователя по ID")
     @Owner("Prilepskiy AE")
     void Test2() {
-        User original = new User(name, email, age);
+        User original = createTestUser();
         User saved = userDao.save(original);
 
         Assertions.assertThat(saved).isNotNull();
@@ -93,7 +83,7 @@ class UserDaoImplTest extends BaseTest{
     @Story("Получение списка всех пользователей")
     @Owner("Prilepskiy AE")
     void test4() {
-        userDao.save(new User(name, email, age));
+        userDao.save(createTestUser());
         userDao.save(new User("test_test", "test_test@test.com", 35));
 
         List<User> all = userDao.findAll();
@@ -112,7 +102,7 @@ class UserDaoImplTest extends BaseTest{
     @Owner("Prilepskiy AE")
     void test5() {
 
-        User original = new User(name, email, age);
+        User original = createTestUser();
         User saved = userDao.save(original);
         saved.setAge(41);
         saved.setName("test_Alex Updated");
@@ -132,7 +122,7 @@ class UserDaoImplTest extends BaseTest{
     @Owner("Prilepskiy AE")
     void test6() {
 
-        User toDelete = new User(name, email, age);
+        User toDelete = createTestUser();
         User saved = userDao.save(toDelete);
 
         boolean result = userDao.deleteById(saved.getId());
@@ -167,7 +157,7 @@ class UserDaoImplTest extends BaseTest{
     @Owner("Prilepskiy AE")
     void test8() {
 
-        userDao.save(new User(name, email, age));
+        userDao.save(createTestUser());
 
         User duplicate = new User("test_test2", email, 30);
 
