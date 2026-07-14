@@ -39,7 +39,6 @@ public class UserServiceImplTest extends BaseTest{
     @Owner("Prilepskiy AE")
     void test1() {
 
-        User input = new User(name, email, age);
         User saved = new User(name, email, age);
 
         when(userDao.findByEmail(eq(email))).thenReturn(Optional.empty());
