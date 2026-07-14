@@ -5,9 +5,27 @@ import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 
-public class HibernateUtil {
+/**
+ * Утилитный класс для настройки и управления жизненным циклом {@link SessionFactory}.
+ * Обеспечивает централизованный доступ к фабрике сессий для работы с базой данных.
+ *
+ * <p>Инициализирует SessionFactory при первой загрузке класса, используя
+ * конфигурационный файл по умолчанию (hibernate.cfg.xml).</p>
+ */
 
+public class HibernateUtil {
+    /**
+     * Единственный экземпляр SessionFactory для всего приложения.
+     */
     private static final SessionFactory sessionFactory = buildSessionFactory();
+
+    /**
+     * Создает и настраивает объект {@link SessionFactory}.
+     *
+     * @return сконфигурированный экземпляр SessionFactory.
+     * @throws ExceptionInInitializerError если возникла ошибка при чтении конфигурации
+     *                                      или создании реестра сервисов.
+     */
 
     private static SessionFactory buildSessionFactory() {
         try {
@@ -22,10 +40,20 @@ public class HibernateUtil {
         }
     }
 
+    /**
+     * Возвращает глобальный экземпляр фабрики сессий.
+     *
+     * @return действующий объект {@link SessionFactory}.
+     */
     public static SessionFactory getSessionFactory() {
         return sessionFactory;
     }
 
+    /**
+     * Закрывает фабрику сессий и освобождает все связанные ресурсы,
+     * такие как пулы соединений и кэши.
+     * Должен вызываться при завершении работы приложения.
+     */
     public static void closeSessionFactory() {
         if (sessionFactory != null) {
             sessionFactory.close();

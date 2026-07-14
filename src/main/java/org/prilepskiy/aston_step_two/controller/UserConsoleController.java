@@ -12,19 +12,77 @@ import java.util.Optional;
 
 import static org.prilepskiy.aston_step_two.utils.Constants.*;
 
+/**
+ * Консольная реализация контроллера пользователей.
+ *
+ * <p>
+ * Класс отвечает за взаимодействие с пользователем через консольное меню
+ * и предоставляет операции создания, поиска, просмотра, обновления и удаления
+ * пользователей.
+ * </p>
+ *
+ * <p>
+ * Использует {@link ConsoleHelper} для чтения и валидации пользовательского ввода,
+ * а также {@link UserService} для выполнения бизнес-логики, связанной с пользователями.
+ * </p>
+ *
+ * <p>
+ * Класс реализует паттерн Singleton: в приложении создается только один экземпляр
+ * {@code UserConsoleController}.
+ * </p>
+ *
+ * @see UserController
+ * @see UserService
+ * @see ConsoleHelper
+ */
 public class UserConsoleController implements UserController {
 
+
+    /**
+     * Единственный экземпляр консольного контроллера пользователей.
+     */
     private static UserConsoleController instance;
 
+    /**
+     * Вспомогательный объект для работы с консолью:
+     * чтения строк, чисел и валидированных пользовательских данных.
+     */
     private final ConsoleHelper consoleHelper;
+
+    /**
+     * Сервис для выполнения операций над пользователями.
+     */
     private final UserService userService;
 
+    /**
+     * Создает экземпляр {@code UserConsoleController}.
+     *
+     * <p>
+     * Конструктор приватный, так как класс использует Singleton.
+     * При создании контроллера инициализируются:
+     * </p>
+     *
+     * <ul>
+     *     <li>{@link ConsoleHelper} для работы с консольным вводом;</li>
+     *     <li>{@link UserDao} через реализацию {@link UserDaoImpl};</li>
+     *     <li>{@link UserService} через реализацию {@link UserServiceImpl}.</li>
+     * </ul>
+     */
     private UserConsoleController() {
         this.consoleHelper = new ConsoleHelper();
         UserDao  dao = new UserDaoImpl();
         this.userService = new UserServiceImpl(dao);
     }
 
+    /**
+     * Возвращает единственный экземпляр {@code UserConsoleController}.
+     *
+     * <p>
+     * Если экземпляр еще не был создан, метод создает его.
+     * </p>
+     *
+     * @return единственный экземпляр {@code UserConsoleController}.
+     */
     public static UserConsoleController getInstance() {
         if (instance == null) {
             instance = new UserConsoleController();
@@ -32,6 +90,14 @@ public class UserConsoleController implements UserController {
         return instance;
     }
 
+    /**
+     * Отображает главное меню пользовательского сервиса в консоли.
+     *
+     * <p>
+     * Меню содержит пункты для выполнения основных CRUD-операций:
+     * создание, поиск, просмотр всех пользователей, обновление и удаление.
+     * </p>
+     */
     private void showMenu() {
         System.out.println("========== USER SERVICE ==========");
         System.out.println("1. Создать пользователя");
@@ -43,6 +109,18 @@ public class UserConsoleController implements UserController {
         System.out.println("==================================");
     }
 
+    /**
+     * Приостанавливает выполнение программы до нажатия клавиши ENTER.
+     *
+     * <p>
+     * Метод используется после выполнения операций, чтобы пользователь успел
+     * прочитать результат перед возвратом к главному меню.
+     * </p>
+     *
+     * <p>
+     * При необходимости метод может быть расширен логикой визуальной очистки консоли.
+     * </p>
+     */
     private void clearConsole() {
         consoleHelper.readLine("Нажмите ENTER! ");
 //        Для удобства, на случай если нужна очистка консоли
@@ -50,6 +128,22 @@ public class UserConsoleController implements UserController {
 //            System.out.println();
 //        }
     }
+
+    /**
+     * Запускает основной цикл работы консольного контроллера.
+     *
+     * <p>
+     * Метод отображает меню, считывает выбор пользователя и вызывает
+     * соответствующий метод контроллера. Цикл продолжается до тех пор,
+     * пока пользователь не выберет пункт выхода.
+     * </p>
+     *
+     * <p>
+     * Доступные действия определяются константами интерфейса {@link UserController},
+     * такими как {@code CREATE_USER}, {@code GET_USER_BY_ID}, {@code GET_ALL_USERS},
+     * {@code UPDATE_USER}, {@code DELETE_USER} и {@code EXIT}.
+     * </p>
+     */
     public void start() {
         boolean running = true;
 
@@ -85,6 +179,21 @@ public class UserConsoleController implements UserController {
         }
     }
 
+    /**
+     * Создает нового пользователя на основе данных, введенных через консоль.
+     *
+     * <p>
+     * Метод запрашивает имя, email и возраст пользователя. Перед созданием
+     * проверяется, существует ли пользователь с таким email. Если email уже занят,
+     * пользователь должен ввести другой email.
+     * </p>
+     *
+     * <p>
+     * При успешном создании выводится информация о сохраненном пользователе.
+     * Если сервис выбрасывает {@link IllegalArgumentException}, в консоль
+     * выводится сообщение об ошибке.
+     * </p>
+     */
     @Override
     public void createUser() {
         System.out.println("=======Создание пользователя======");
@@ -110,6 +219,14 @@ public class UserConsoleController implements UserController {
         }
     }
 
+    /**
+     * Ищет пользователя по идентификатору, введенному через консоль.
+     *
+     * <p>
+     * Если пользователь найден, информация о нем выводится в консоль.
+     * Если пользователь отсутствует, выводится сообщение о том, что он не найден.
+     * </p>
+     */
     @Override
     public void getUserById() {
         System.out.println("=======Найти пользователя по ID======");
@@ -123,6 +240,14 @@ public class UserConsoleController implements UserController {
         clearConsole();
     }
 
+    /**
+     * Выводит в консоль список всех пользователей.
+     *
+     * <p>
+     * Если список пользователей пуст, выводится сообщение о том, что пользователи
+     * не найдены. Иначе каждый пользователь выводится отдельной строкой.
+     * </p>
+     */
     @Override
     public void getAllUsers() {
         System.out.println("=======Показать всех пользователей======");
@@ -135,6 +260,22 @@ public class UserConsoleController implements UserController {
         clearConsole();
     }
 
+    /**
+     * Обновляет данные пользователя по идентификатору.
+     *
+     * <p>
+     * Метод запрашивает ID пользователя, а затем новые значения имени, email
+     * и возраста. Перед обновлением проверяется, существует ли пользователь
+     * с указанным email. Если email уже используется, пользователь должен
+     * ввести другой email.
+     * </p>
+     *
+     * <p>
+     * При успешном обновлении выводится обновленная информация о пользователе.
+     * Если сервис выбрасывает {@link IllegalArgumentException}, в консоль
+     * выводится сообщение об ошибке.
+     * </p>
+     */
     @Override
     public void updateUser() {
         System.out.println("=======Обновить пользователя======");
@@ -162,7 +303,15 @@ public class UserConsoleController implements UserController {
         }
     }
 
-
+    /**
+     * Удаляет пользователя по идентификатору, введенному через консоль.
+     *
+     * <p>
+     * Если пользователь был успешно удален, выводится сообщение об успешном удалении.
+     * Если удалить пользователя не удалось, выводится сообщение о возможном отсутствии
+     * пользователя с указанным ID.
+     * </p>
+     */
     @Override
     public void deleteUser() {
         System.out.println("=======Удалить пользователя======");
